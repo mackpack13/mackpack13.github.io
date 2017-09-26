@@ -92,7 +92,6 @@
       //function to clean the data in the sheet
       function createStreets(s) {
 
-        var i = 0; //index for streetsFile
 
         //overarching array to store all the streets
         var streetPath = {
@@ -102,7 +101,9 @@
 
         // create a scale
         var mapScale = d3.scaleLinear().domain([0, 50]).range([0, 1650])
-          //loop through the file
+
+        var i = 0; //index for streetsFile
+        //loop through the file
         while (i < s.length) {
 
           //get the y coordinate of each row
@@ -156,23 +157,51 @@
 
         var i = 0; //index for streetsFile
 
-        var k = 0//makes sure i can loop through the deathdaysFile correctly
+        var k = 0 //makes sure i can loop through the deathdaysFile correctly
 
         //loop through the file
-         while (i < d.length) {
+        while (i < d.length) {
 
-           //will loop through as many times as there were deaths that day
-            for (var j = 0; j < d[i][1]; j++){
-               l[k].push(d[i][0])
+          //will loop through as many times as there were deaths that day
+          for (var j = 0; j < d[i][1]; j++) {
+            l[k].push(d[i][0])
             k++ //increments the number of rows in the location file
-            }
-           i++
+          }
+          i++
 
         } //end of while
 
         return l;
 
       }
+
+      // //-----------CREATEBUILDING FUNCTION-----------
+      // function createBuildings(b) {
+      //   var h = 575;
+      //   var i = 0; //index
+      //   var path = "";
+      //   var m; //where the pen is put down
+      //   var l; //where the pan moves to
+      //   while (i < b.length) {
+      //     for (var j = 0; j < b[i].length; j++) {
+      //       var x = b[i][j][0];
+      //       var y = b[i][j][1];
+      //       if (j == 0) {
+      //         m = "M" + x + " " + (h-y);
+      //         path += m;
+      //       } else {
+      //         l = " L" + x + " " + (h-y);
+      //         path += l
+      //       }
+      //
+      //       //console.log(path)
+      //
+      //     }
+      //     path += "Z"
+      //     i++
+      //   }
+      //   // return (path)
+      // }
 
 
       // -----------CREATION OF THE MAP-----------
@@ -191,7 +220,12 @@
       //call the functions to create the streets; save to variable
       var streetResult = createStreets(streetsFile);
 
+      //call the function to combine the locations and days
       var deathLocationResult = combineDeathInfo(deathLocationFile, deathDaysFile);
+
+      // var buildingResult = createBuildings(buildingsFile);
+      //
+      // console.log(buildingResult);
 
       // create a scale
       var mapScale = d3.scaleLinear().domain([0, 50]).range([0, 1650])
@@ -219,28 +253,57 @@
         .attr("fill", "none")
         .attr("transform", "translate(-80, 90)")
 
-        var streetNames = map
-          .selectAll("text")
-          .data(labelsFile)
+        //adding locations for each pump
+        var buildingsSVG = map
+          .selectAll(".buildings")
+          .data(buildingsFile)
           .enter()
-          .append("text")
+          .append("rect")
+          .attr("class", "buildings")
           .attr("x", function(d) {
-            return (d[0]); //gets first item in array
+            return d[0]; //gets first item in array
           })
           .attr("y", function(d) {
-            return h - (d[1]); //gets second item in array
+            return h - d[1]; //gets second item in array
           })
-          .attr("transform", function(d){
+          .attr("width", function (d){
+            return d[2]
+          })
+          .attr("height", function (d){
+            return d[3]
+          })
+          .attr("transform", function(d) {
 
-            return "rotate("+ d[3] +", "+ d[0]+", " + (h - d[1])+")"
+            return "rotate(" + d[4] + ", " + d[0] + ", " + (h - d[1]) + ")"
           })
-          .style("font-size", function(d){
-            return d[4] +"px";
-          })
-          .style("font-weight", "bold")
-          .text(function(d){
-            return d[2];
-          })
+           .style("stroke", "#4b4b4b")
+            .style("stroke-width", "2px")
+            .style("fill", "#CECECE")
+
+
+      var names = map
+        .selectAll("text")
+        .data(labelsFile)
+        .enter()
+        .append("text")
+        .attr("x", function(d) {
+          return (d[0]); //gets first item in array
+        })
+        .attr("y", function(d) {
+          return h - (d[1]); //gets second item in array
+        })
+        .attr("transform", function(d) {
+
+          return "rotate(" + d[3] + ", " + d[0] + ", " + (h - d[1]) + ")"
+        })
+        .style("font-size", function(d) {
+          return d[4] + "px";
+        })
+        .style("font-weight", "bold")
+        .text(function(d) {
+          return d[2];
+
+        })
 
       //adding locations for each death
       var deathLocationSVG = map
@@ -271,22 +334,13 @@
 
         })
 
-      // var buidlingSVG = map
-      //   .append("path")
-      //   .attr("d", geoPath(buildingResult))
-      //   .style("stroke", "#4b4b4b")
-      //   .style("stroke-width", "1.5px")
-      //   .attr("vector-effect", "non-scaling-stroke")
-      //   .attr("transform", "translate(-80, 90)")
-
-
-
       //adding locations for each pump
       var pumpsSVG = map
-        .selectAll("rect")
+        .selectAll(".pumps")
         .data(pumpsFile)
         .enter()
         .append("rect")
+        .attr("class", "buildings")
         .attr("x", function(d) {
           return mapScale(d[0]); //gets first item in array
         })
@@ -415,17 +469,17 @@
         .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")")
 
-          var parseDate = d3.timeParse("%b-%d");
+      var parseDate = d3.timeParse("%b-%d");
 
-          //format the data
-          deathDaysFile.forEach(function(d) {
-            d[1] = +d[1];
-          });
+      //format the data
+      deathDaysFile.forEach(function(d) {
+        d[1] = +d[1];
+      });
 
-          //format the data
-          deathLocationResult.forEach(function(d){
-            d[4] = parseDate(d[4])
-          })
+      //format the data
+      deathLocationResult.forEach(function(d) {
+        d[4] = parseDate(d[4])
+      })
 
       // Scale the range of the data in the domains
       xScale.domain(deathDaysFile.map(function(d) {
@@ -470,11 +524,10 @@
           // d3.select(this).style("fill", "red");
           var selectedDate = parseDate(d[0]);
           map.selectAll("circle") //this works
-            .attr("visibility", function (d){
-              if (d[4] <= selectedDate){
+            .attr("visibility", function(d) {
+              if (d[4] <= selectedDate) {
                 return "visible";
-              }
-              else {
+              } else {
                 return "hidden";
               }
             });
@@ -550,6 +603,7 @@
         <div class="modal-body">
           <p>This is an interactive map of the London Cholera Epidemic of 1854. It details the locations of each death, the locations of important areas (i.e. pumps, brewery), and the number of deaths over the course of the 40 days.
             <p>To filter the data shown on the map, select the bars within the bargraphs.</p>
+            <p>Check out the <a href="https://docs.google.com/document/d/1-BEUOOoCBh8uPXjka5E_6QGTFy3g3YnBlJkM5N-eCac/edit?usp=sharing" style="text-decoration: none" target="_blank">design documentation</a> and <a href="#" style="text-decoration: none" target="_blank">informational video</a> to learn more about how this project was made.sharing</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal">Let's go</button>
@@ -570,7 +624,6 @@
           <div class="col-md-12 col-lg-12" id="timeline">
           </div>
           <div class="col-md-12 col-lg-12" id="distribution">
-
           </div>
         </div>
       </div>
