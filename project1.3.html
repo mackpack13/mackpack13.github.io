@@ -175,35 +175,6 @@
 
       }
 
-      // //-----------CREATEBUILDING FUNCTION-----------
-      // function createBuildings(b) {
-      //   var h = 575;
-      //   var i = 0; //index
-      //   var path = "";
-      //   var m; //where the pen is put down
-      //   var l; //where the pan moves to
-      //   while (i < b.length) {
-      //     for (var j = 0; j < b[i].length; j++) {
-      //       var x = b[i][j][0];
-      //       var y = b[i][j][1];
-      //       if (j == 0) {
-      //         m = "M" + x + " " + (h-y);
-      //         path += m;
-      //       } else {
-      //         l = " L" + x + " " + (h-y);
-      //         path += l
-      //       }
-      //
-      //       //console.log(path)
-      //
-      //     }
-      //     path += "Z"
-      //     i++
-      //   }
-      //   // return (path)
-      // }
-
-
       // -----------CREATION OF THE MAP-----------
 
       //geopath data generator
@@ -222,10 +193,6 @@
 
       //call the function to combine the locations and days
       var deathLocationResult = combineDeathInfo(deathLocationFile, deathDaysFile);
-
-      // var buildingResult = createBuildings(buildingsFile);
-      //
-      // console.log(buildingResult);
 
       // create a scale
       var mapScale = d3.scaleLinear().domain([0, 50]).range([0, 1650])
