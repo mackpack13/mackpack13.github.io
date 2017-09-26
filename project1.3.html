@@ -29,6 +29,14 @@
       /* align horizontal */
     }
 
+    .active {
+      background-color: red;
+    }
+
+    .bar:hover {
+      fill: red;
+    }
+
     #map {
       padding-right: 20px;
     }
@@ -220,32 +228,32 @@
         .attr("fill", "none")
         .attr("transform", "translate(-80, 90)")
 
-        //adding locations for each pump
-        var buildingsSVG = map
-          .selectAll(".buildings")
-          .data(buildingsFile)
-          .enter()
-          .append("rect")
-          .attr("class", "buildings")
-          .attr("x", function(d) {
-            return d[0]; //gets first item in array
-          })
-          .attr("y", function(d) {
-            return h - d[1]; //gets second item in array
-          })
-          .attr("width", function (d){
-            return d[2]
-          })
-          .attr("height", function (d){
-            return d[3]
-          })
-          .attr("transform", function(d) {
+      //adding locations for each pump
+      var buildingsSVG = map
+        .selectAll(".buildings")
+        .data(buildingsFile)
+        .enter()
+        .append("rect")
+        .attr("class", "buildings")
+        .attr("x", function(d) {
+          return d[0]; //gets first item in array
+        })
+        .attr("y", function(d) {
+          return h - d[1]; //gets second item in array
+        })
+        .attr("width", function(d) {
+          return d[2]
+        })
+        .attr("height", function(d) {
+          return d[3]
+        })
+        .attr("transform", function(d) {
 
-            return "rotate(" + d[4] + ", " + d[0] + ", " + (h - d[1]) + ")"
-          })
-           .style("stroke", "#4b4b4b")
-            .style("stroke-width", "2px")
-            .style("fill", "#CECECE")
+          return "rotate(" + d[4] + ", " + d[0] + ", " + (h - d[1]) + ")"
+        })
+        .style("stroke", "#4b4b4b")
+        .style("stroke-width", "2px")
+        .style("fill", "#CECECE")
 
 
       var names = map
@@ -460,6 +468,7 @@
       timeline.selectAll(".bar")
         .data(deathDaysFile)
         .enter().append("rect")
+        .attr("class", "bar")
         .attr("fill", "#4b4b4b")
         .attr("x", function(d) {
           return xScale(d[0]);
@@ -471,24 +480,20 @@
         .attr("height", function(d) {
           return h3 - yScale(d[1]);
         })
-        .on("mouseover", function(d) {
-          d3.select(this).style("fill", "red");
-        })
-        .on("mouseout", function(d) {
-          d3.select(this).style("fill", "#4b4b4b");
-        })
+        // .on("hover", function(d) {
+        //   d3.select(this).style("fill", "red");
+        // })
+        // .on("mouseout", function(d) {
+        //   d3.select(this).style("fill", "#4b4b4b");
+        // })
         .on("click", function(d) {
+          d3.selectAll(".bar").style("fill", "#4b4b4b")
+          d3.select(this)
+            .style("fill", "red");
 
-          d3.select(this).style("fill", "red");
+          console.log("meow")
+            // $(this).addClass ("active");
 
-
-          // //will continue to run until all the bars up to the selected one
-          // while (i < index){
-          //   console.log("meow");
-          //   timeline.select('rect').style("fill", "red");
-          //   i++;
-          //}
-          // d3.select(this).style("fill", "red");
           var selectedDate = parseDate(d[0]);
           map.selectAll("circle") //this works
             .attr("visibility", function(d) {
@@ -547,6 +552,126 @@
         .style("font-weight", "bold")
         .text("Deaths by Day");
 
+      //----------CREATE DISTRIBUTION-----------
+
+      // append the svg object to the body of the page
+      // append a 'group' element to 'svg'
+      // moves the 'group' element to the top left margin
+
+      var data = [
+        ["0-10", 10, 50],
+        ["11-20", 50, 70],
+        ["21-40", 20, 90],
+        ["41-60", 100, 40],
+        ["61-80", 55, 5],
+        ["80+", 10, 10]
+      ]
+
+
+
+      // set the ranges
+      var xScale2 = d3.scaleBand()
+        .range([0, w3])
+        .padding(0.1);
+
+      var yScale2 = d3.scaleLinear()
+        .range([h3, 0]);
+
+      var distribution = d3.select("#distribution").append("svg")
+        .attr("id", "floatLeft")
+        .style("border", "1px solid red")
+        .attr("width", w3 + margin.left + margin.right)
+        .attr("height", h3 + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")")
+
+      // Scale the range of the data in the domains
+      xScale2.domain(data.map(function(d) {
+        return d[0];
+      }));
+      yScale2.domain([0, d3.max(data, function(d) {
+        return d[1] + d[2];
+      })]);
+
+      distribution.selectAll(".boy")
+        .data(data)
+        .enter().append("rect")
+        .attr("class", "boy")
+        .attr("x", function(d) {
+          return xScale2(d[0]);
+        })
+        .attr("width", 80)
+        .attr("y", function(d) {
+          return yScale2(d[1]);
+        })
+        .attr("height", function(d) {
+          return h3 - yScale2(d[1]);
+        })
+        .attr("fill", "blue")
+
+        distribution.selectAll(".girl")
+          .data(data)
+          .enter().append("rect")
+          .attr("class", "girl")
+          .attr("x", function(d) {
+            return xScale2(d[0]);
+          })
+          .attr("width", 80)
+          .attr("y", function(d) {
+            console.log(d[2])
+            return yScale2(d[2]);
+          })
+          .attr("height", function(d) {
+            return h3 - yScale2(d[2]);
+          })
+          .attr("fill", "red")
+
+
+      // add the x Axis
+      distribution.append("g")
+        .attr("transform", "translate(0," + h3 + ")")
+        .call(d3.axisBottom(xScale2))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)")
+        // .attr("class", function(d, i) {
+        //   if (i % 3 != 0) d3.select(this).remove();
+        // });
+
+      // add the y Axis
+      distribution.append("g")
+        .call(d3.axisLeft(yScale2));
+
+
+      // text label for the y axis
+      distribution.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (h3 / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("font-size", "11px")
+        .text("Number of Deaths");
+
+      // text label for the x axis
+      distribution.append("text")
+        .attr("transform",
+          "translate(" + (w3 / 2) + " ," +
+          (h3 + margin.top + 15) + ")")
+        .style("text-anchor", "middle")
+        .style("font-size", "11px")
+        .text("Age Ranges");
+
+      distribution.append("text")
+        .attr("x", (w3 / 2))
+        .attr("y", -20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "18px")
+        .style("font-weight", "bold")
+        .text("Distribution of Age to Gender ");
 
 
     }
