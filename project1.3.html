@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>The London Cholera Epidemic of 1854 </title>
+  <style>
+  body,
+    html {
+      margin: 0;
+      color: #4b4b4b;
+    }
+
+    #heading {
+      background-color: #4b4b4b;
+      padding: 10px;
+      color: white;
+    }
+
+    .container-fluid {
+      margin: 0 auto !important;
+      padding-right: 0px !important;
+      padding-left: 0px !important;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .col-lg-12 {
+      display: flex;
+      /* align horizontal */
+    }
+
+    #map {
+      padding-right: 20px;
+    }
+
+    #floatRight {
+      float: right;
+    }
+
+    #timeline,
+    #distribution {
+      padding-left: 20px;
+    }
+
+    #floatLeft {
+      float: left;
+    }
+
+    @media only screen and (max-width: 768px) {
+      #floatRight,
+      #floatLeft {
+        float: none;
+      }
+    }
+  }
+  </style>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <script type="text/javascript" src="d3/d3.js"></script>
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+
+  <script>
+    $(document).ready(function() {
+
+      $('#memberModal').modal('show');
+
+    });
+    //load into multiple files at once
+    d3.queue()
+      .defer(d3.json, "data/streets.json")
+      .defer(d3.json, "data/pumps.json")
+      .defer(d3.json, "data/deathLocation.json")
+      .defer(d3.json, "data/deathDays.json")
+      .defer(d3.json, "data/buildings.json")
+      .defer(d3.json, "data/labels.json")
+      .await(analyze);
+
+    //pass in all the files
+    function analyze(error, streetsFile, pumpsFile, deathLocationFile, deathDaysFile, buildingsFile, labelsFile) {
+      if (error) {
+        console.log(error);
+      }
+
+
+      // -----------CREATESTREETS FUNCTION-----------
+      //function to clean the data in the sheet
+      function createStreets(s) {
+
+        var i = 0; //index for streetsFile
+
+        //overarching array to store all the streets
+        var streetPath = {
+          "type": "MultiLineString",
+          "coordinates": []
+        };
+
+        // create a scale
+        var mapScale = d3.scaleLinear().domain([0, 50]).range([0, 1650])
+          //loop through the file
+        while (i < s.length) {
+
+          //get the y coordinate of each row
+          var yPoint = s[i][1];
+
+          //if that point is an integer...
+          if (Number.isInteger(yPoint) == true) {
+
+            //array to store the coordinates
+            var street = [];
+
+            //iterate to the next row to get the M coordinate
+            i++;
+
+            //run the new line(s) of json depending on yPoint
+            for (j = 0; j < yPoint; j++) {
+
+              //array to store x and y
+              var coords = [];
+
+              //get x coordinate depending on index
+              var x = mapScale(s[i][0]);
+              //get y coordinate depending on index
+              var y = h - mapScale(s[i][1]);
+
+              //push the x and y coordinate into the array
+              coords.push(x);
+              coords.push(y);
+
+              //push the coordinates into the street array
+              street.push(coords);
+
+              //iterate to the next row in the json file
+              i++;
+            } //end of for
+
+            streetPath['coordinates'].push(street);
+
+          } //end of if
+
+        } //end of while
+
+        return streetPath
+
+      } //end of createStreets function
+
+      //------------COMBINING LOCATION AND DEATH DAY---------
+
+      //function to clean the data in the sheet
+      function combineDeathInfo(l, d) {
+
+        var i = 0; //index for streetsFile
+
+        var k = 0//makes sure i can loop through the deathdaysFile correctly
+
+        //loop through the file
+         while (i < d.length) {
+
+           //will loop through as many times as there were deaths that day
+            for (var j = 0; j < d[i][1]; j++){
+               l[k].push(d[i][0])
+            k++ //increments the number of rows in the location file
+            }
+           i++
+
+        } //end of while
+
+        return l;
+
+      }
+
+
+      // -----------CREATION OF THE MAP-----------
+
+      //geopath data generator
+      //https://www.dashingd3js.com/lessons/d3-geo-path
+      //define the variables for the svg container
+      var h = 575;
+      var w = 600;
+      var geoPath = d3.geoPath()
+
+      //height and width for legend
+      var h2 = 50;
+      var w2 = 600;
+
+      //call the functions to create the streets; save to variable
+      var streetResult = createStreets(streetsFile);
+
+      var deathLocationResult = combineDeathInfo(deathLocationFile, deathDaysFile);
+
+      // create a scale
+      var mapScale = d3.scaleLinear().domain([0, 50]).range([0, 1650])
+
+      //creating the initial svg shape
+      var map = d3.select("#map")
+        .append("svg")
+        .attr("height", h)
+        .attr("width", w)
+        .attr("id", "floatRight")
+        //.style("border", "1px solid red")
+        //     .call(d3.zoom().on("zoom", function () {
+        //         svg.attr("transform", d3.event.transform)
+        // }))
+
+      //https://coderwall.com/p/psogia/simplest-way-to-add-zoom-pan-on-d3-js
+      //creating the path to put the coordinates in
+      //call the createStreets function
+      var streetSVG = map
+        .append("path")
+        .attr("d", geoPath(streetResult))
+        .style("stroke", "#4b4b4b")
+        .style("stroke-width", "1.5px")
+        .attr("vector-effect", "non-scaling-stroke")
+        .attr("fill", "none")
+        .attr("transform", "translate(-80, 90)")
+
+        var streetNames = map
+          .selectAll("text")
+          .data(labelsFile)
+          .enter()
+          .append("text")
+          .attr("x", function(d) {
+            return (d[0]); //gets first item in array
+          })
+          .attr("y", function(d) {
+            return h - (d[1]); //gets second item in array
+          })
+          .attr("transform", function(d){
+
+            return "rotate("+ d[3] +", "+ d[0]+", " + (h - d[1])+")"
+          })
+          .style("font-size", function(d){
+            return d[4] +"px";
+          })
+          .style("font-weight", "bold")
+          .text(function(d){
+            return d[2];
+          })
+
+      //adding locations for each death
+      var deathLocationSVG = map
+        .selectAll("circle")
+        .data(deathLocationResult)
+        .enter()
+        .append("circle")
+        .attr("visibility", "visible")
+        .attr("cx", function(d) {
+          return mapScale(d[0]); //gets first item in array
+        })
+        .attr("cy", function(d) {
+          return h - mapScale(d[1]); //gets second item in array
+        })
+        .attr("r", 4)
+        .attr("transform", "translate(-80, 90)")
+        .attr("fill", function(d) {
+
+          //if the last element in the array is a 0, it's a male
+          if (d[3] == 0) {
+            return "#6AAFE6";
+          }
+
+          //if the last element in the array is a 1, it's a female
+          else if (d[3] == 1) {
+            return "#FF9DAB";
+          }
+
+        })
+
+      // var buidlingSVG = map
+      //   .append("path")
+      //   .attr("d", geoPath(buildingResult))
+      //   .style("stroke", "#4b4b4b")
+      //   .style("stroke-width", "1.5px")
+      //   .attr("vector-effect", "non-scaling-stroke")
+      //   .attr("transform", "translate(-80, 90)")
+
+
+
+      //adding locations for each pump
+      var pumpsSVG = map
+        .selectAll("rect")
+        .data(pumpsFile)
+        .enter()
+        .append("rect")
+        .attr("x", function(d) {
+          return mapScale(d[0]); //gets first item in array
+        })
+        .attr("y", function(d) {
+          return h - mapScale(d[1]); //gets second item in array
+        })
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("transform", "translate(-80, 90)")
+        .attr("fill", "#881600");
+
+
+
+      //title of the map
+      map.append("text")
+        .attr("x", (w / 2))
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "18px")
+        .style("font-weight", "bold")
+        .text("Map of Deaths by Cholera");
+
+      //legend of the map
+      var legend = d3.select("#map")
+        .append("svg")
+        .attr("height", h2)
+        .attr("width", w2)
+        .attr("id", "floatRight")
+
+      //pumps legend info
+      legend.append("rect")
+        .attr("x", 40)
+        .attr("y", (h2 / 2) - 12)
+        .attr("width", 15)
+        .attr("height", 15)
+        .style("fill", "#881600");
+
+      legend.append("text")
+        .attr("x", 90)
+        .attr("y", (h2 / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Pumps");
+
+      //male deaths legend info
+      legend.append("circle")
+        .attr("cx", 165)
+        .attr("cy", (h2 / 2) - 5)
+        .attr("r", 8)
+        .style("fill", "#6AAFE6");
+
+      legend.append("text")
+        .attr("x", 220)
+        .attr("y", (h2 / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Male Deaths");
+
+      //female deaths legend info
+      legend.append("circle")
+        .attr("cx", 310)
+        .attr("cy", (h2 / 2) - 5)
+        .attr("r", 8)
+        .style("fill", "#FF9DAB");
+
+      legend.append("text")
+        .attr("x", 375)
+        .attr("y", (h2 / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Female Deaths");
+
+
+      //building legend info
+      legend.append("rect")
+        .attr("x", 470)
+        .attr("y", (h2 / 2) - 18)
+        .attr("width", 30)
+        .attr("height", 30)
+        .style("stroke", "#4b4b4b")
+        .style("stroke-width", "2px")
+        .style("fill", "#CECECE");
+
+      legend.append("text")
+        .attr("x", 540)
+        .attr("y", (h2 / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Buildings");
+
+
+
+
+      // -----------CREATION OF THE LINEGRAPH-----------
+
+
+      // set the dimensions and margins of the graph
+      var margin = {
+          top: 50,
+          right: 40,
+          bottom: 80,
+          left: 60
+        },
+        w3 = 600 - margin.left - margin.right,
+        h3 = 350 - margin.top - margin.bottom;
+
+      // set the ranges
+      var xScale = d3.scaleBand()
+        .range([0, w3])
+        .padding(0.1);
+      var yScale = d3.scaleLinear()
+        .range([h3, 0]);
+
+      // append the svg object to the body of the page
+      // append a 'group' element to 'svg'
+      // moves the 'group' element to the top left margin
+      var timeline = d3.select("#timeline").append("svg")
+        .attr("id", "floatLeft")
+        .attr("width", w3 + margin.left + margin.right)
+        .attr("height", h3 + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")")
+
+          var parseDate = d3.timeParse("%b-%d");
+
+          //format the data
+          deathDaysFile.forEach(function(d) {
+            d[1] = +d[1];
+          });
+
+          //format the data
+          deathLocationResult.forEach(function(d){
+            d[4] = parseDate(d[4])
+          })
+
+      // Scale the range of the data in the domains
+      xScale.domain(deathDaysFile.map(function(d) {
+        return d[0];
+      }));
+      yScale.domain([0, d3.max(deathDaysFile, function(d) {
+        return d[1];
+      })]);
+
+      // append the rectangles for the bar chart
+      timeline.selectAll(".bar")
+        .data(deathDaysFile)
+        .enter().append("rect")
+        .attr("fill", "#4b4b4b")
+        .attr("x", function(d) {
+          return xScale(d[0]);
+        })
+        .attr("width", 10)
+        .attr("y", function(d) {
+          return yScale(d[1]);
+        })
+        .attr("height", function(d) {
+          return h3 - yScale(d[1]);
+        })
+        .on("mouseover", function(d) {
+          d3.select(this).style("fill", "red");
+        })
+        .on("mouseout", function(d) {
+          d3.select(this).style("fill", "#4b4b4b");
+        })
+        .on("click", function(d) {
+
+          d3.select(this).style("fill", "red");
+
+
+          // //will continue to run until all the bars up to the selected one
+          // while (i < index){
+          //   console.log("meow");
+          //   timeline.select('rect').style("fill", "red");
+          //   i++;
+          //}
+          // d3.select(this).style("fill", "red");
+          var selectedDate = parseDate(d[0]);
+          map.selectAll("circle") //this works
+            .attr("visibility", function (d){
+              if (d[4] <= selectedDate){
+                return "visible";
+              }
+              else {
+                return "hidden";
+              }
+            });
+
+
+        });
+
+      // add the x Axis
+      timeline.append("g")
+        .attr("transform", "translate(0," + h3 + ")")
+        .call(d3.axisBottom(xScale))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)")
+        .attr("class", function(d, i) {
+          if (i % 3 != 0) d3.select(this).remove();
+        });
+
+      // add the y Axis
+      timeline.append("g")
+        .call(d3.axisLeft(yScale));
+
+
+      // text label for the y axis
+      timeline.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (h3 / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("font-size", "11px")
+        .text("Number of Deaths");
+
+      // text label for the x axis
+      timeline.append("text")
+        .attr("transform",
+          "translate(" + (w3 / 2) + " ," +
+          (h3 + margin.top + 15) + ")")
+        .style("text-anchor", "middle")
+        .style("font-size", "11px")
+        .text("Date");
+
+      timeline.append("text")
+        .attr("x", (w3 / 2))
+        .attr("y", -20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "18px")
+        .style("font-weight", "bold")
+        .text("Deaths by Day");
+
+
+
+    }
+  </script>
+</head>
+
+<!-- <body onload="init()"> -->
+
+<body>
+  <!-- Modal -->
+  <!-- <div class="modal fade" id="memberModal" tabindex="-1" role="dialog" aria-labelledby="memberModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="memberModalLabel" style="float: left">Welcome!</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+          </button>
+
+
+        </div>
+        <div class="modal-body">
+          <p>This is an interactive map of the London Cholera Epidemic of 1854. It details the locations of each death, the locations of important areas (i.e. pumps, brewery), and the number of deaths over the course of the 40 days.
+            <p>To filter the data shown on the map, select the bars within the bargraphs.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Let's go</button>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  <div class="container-fluid text-center">
+    <div id="heading">
+      <h2>The London Cholera Epidemic of 1854 </h2> Mikaylah Gross | INFO-H517
+    </div>
+    <div class="row ">
+      <div class="col-md-12 col-lg-6" id="map">
+
+      </div>
+      <div class="col-md-12 col-lg-6">
+        <div class="row">
+          <div class="col-md-12 col-lg-12" id="timeline">
+          </div>
+          <div class="col-md-12 col-lg-12" id="distribution">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

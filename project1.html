@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Project 1</title>
+    <style>
+
+      body, html {
+        margin: 0;
+      }
+      .container-fluid{
+        margin: 0 auto !important;
+        padding-top: 20px;
+        font-family: 'Roboto', sans-serif;
+      }
+    </style>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script type="text/javascript" src="d3/d3.js"></script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+   <script>
+
+    //load into multiple files at once
+    d3.queue()
+      .defer(d3.json, "data/streets.json")
+      .defer(d3.csv, "data/pumps.json")
+      .await(analyze);
+
+      //pass in all the files
+      function analyze(error, streetsFile, pumpsFile) {
+        if(error) { console.log(error); }
+
+
+        // -----------CREATESTREETS FUNCTION-----------
+        //function to create streets
+        function createStreets(s){
+
+          var i = 0; //index for streetsFile
+
+          //overarching array to store all the streets
+          var streetPath = {
+            "type": "MultiLineString",
+            "coordinates": []
+          };
+
+          //loop through the file
+          while (i < s.length){
+
+            //get the y coordinate of each row
+            var yPoint = s[i][1];
+
+            //if that point is an integer...
+            if (Number.isInteger(yPoint) == true){
+
+                //array to store the coordinates
+                var street = [];
+
+                //iterate to the next row to get the M coordinate
+                i++;
+
+                //run the new line(s) of json depending on yPoint
+                for (j = 0; j < yPoint; j++){
+
+                  //array to store x and y
+                  var coords = [];
+
+                  //get x coordinate depending on index
+                  var x = s[i][0]
+                  //get y coordinate depending on index
+                  var y = 500 - s[i][1]
+
+
+                  //push the x and y coordinate into the array
+                  coords.push(x);
+                  coords.push(y);
+
+                  //push the coordinates into the street array
+                  street.push(coords);
+
+                  //iterate to the next row in the json file
+                  i++;
+                } //end of for
+
+                streetPath['coordinates'].push(street);
+
+            } //end of if
+
+          } //end of while
+
+          return streetPath
+
+        }//end of createStreets function
+
+
+        // -----------CREATEPUMPS FUNCTION -----------
+        function createPumps(p){
+
+          // console.log(p);
+
+          var i = 0; //index
+
+        }
+
+        // -----------FUNCTION CALLS -----------
+
+        //geopath data generator
+        //https://www.dashingd3js.com/lessons/d3-geo-path
+        //define the variables for the svg container
+        var h = 500;
+        var w = 500;
+        var geoPath = d3.geoPath()
+
+        //call the functions to create the streets; save to variable
+        var streetResult = createStreets(streetsFile);
+
+        //call the function to create the pumps; save to a variable
+
+        var pumpResult = createPumps(pumpsFile);
+        // createPumps(pumpsFile);
+
+        //creating the initial svg shape
+        var svg = d3.select("#map")
+          .append("svg")
+          .attr("height", h)
+          .attr("width", w)
+          .attr("viewBox", "3 3 17 17");
+
+        //https://coderwall.com/p/psogia/simplest-way-to-add-zoom-pan-on-d3-js
+        //creating the path to put the coordinates in
+        //call the createStreets function
+        var streetSVG = svg
+           .append("path")
+           .attr("d", geoPath(streetResult))
+           .style("stroke", "#656565")
+           .style("stroke-width", "2px")
+           .attr("vector-effect", "non-scaling-stroke")
+           .attr("fill", "none")
+
+           console.log(geoPath(streetResult))
+
+      }
+
+
+
+    </script>
+  </head>
+
+  <!-- <body onload="init()"> -->
+  <body>
+    <div class="container-fluid text-center">
+      <h2>John Snow's Interactive Cholera Map</h2>
+      Mikaylah Gross | INFO-H517
+      <br><br>
+      <div class="row ">
+        <div class="col-md-12 col-lg-6" id="map">
+         </div>
+         <div class="col-md-12 col-lg-6">
+            <div class="row">
+              <div class="col-md-12 col-lg-12" styler="border: 1px solid red;">
+                Timeline
+              </div>
+              <div class="col-md-12 col-lg-12">
+                Distribution graph
+              </div>
+            </div>
+         </div>
+      </div>
+
+    </div>
+  </body>
+
+</html>

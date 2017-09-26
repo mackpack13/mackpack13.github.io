@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+.bar { fill: steelblue; }
+
+</style>
+<body>
+
+<!-- load the d3.js library -->
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+
+d3.queue()
+	.defer(d3.json, "data/streets.json")
+	.defer(d3.json, "data/pumps.json")
+	.defer(d3.json, "data/deathLocation.json")
+	.defer(d3.json, "data/deathDays.json")
+	.await(analyze);
+
+	//pass in all the files
+	function analyze(error, streetsFile, pumpsFile, deathLocationFile, deathDaysFile) {
+		if(error) { console.log(error); }
+
+		            // set the dimensions and margins of the graph
+		            var margin = {top: 20, right: 20, bottom: 60, left: 40},
+		                w2 = 500 - margin.left - margin.right,
+		                h2 = 250 - margin.top - margin.bottom;
+
+		            // set the ranges
+		            var xScale = d3.scaleBand()
+		                      .range([0, w2])
+		                      .padding(0.1);
+		            var yScale = d3.scaleLinear()
+		                      .range([h2, 0]);
+
+		            // append the svg object to the body of the page
+		            // append a 'group' element to 'svg'
+		            // moves the 'group' element to the top left margin
+		            var timeline = d3.select("#timeline").append("svg")
+		                .attr("width", w2 + margin.left + margin.right)
+		                .attr("height", h2 + margin.top + margin.bottom)
+		              .append("g")
+		                .attr("transform",
+		                      "translate(" + margin.left + "," + margin.top + ")")
+
+
+		              // Scale the range of the data in the domains
+		              xScale.domain(deathDaysFile.map(function(d) { return d[0]; }));
+		              yScale.domain([0, d3.max(deathDaysFile, function(d) { return +d[1]; })]);
+
+		              // append the rectangles for the bar chart
+		              timeline.selectAll(".bar")
+		                  .data(deathDaysFile)
+		                .enter().append("rect")
+		            		.attr("fill", "red")
+		                  .attr("x", function(d) { return xScale(d[0]); })
+		                  .attr("width", 10)
+		                  .attr("y", function(d) { return yScale(+d[1]); })
+		                  .attr("height", function(d) { return h2 - yScale(+d[1]); });
+
+		              // add the x Axis
+		              timeline.append("g")
+		                  .attr("transform", "translate(0," + h2 + ")")
+		                  .call(d3.axisBottom(xScale))
+		            			.selectAll("text")
+		                 .style("text-anchor", "end")
+		                 .attr("dx", "-.8em")
+		                 .attr("dy", ".15em")
+		                 .attr("transform", "rotate(-65)")
+		                 .attr("class", function(d,i){
+		              			if(i%3 != 0) d3.select(this).remove();
+		             		});;
+
+		              // add the y Axis
+		              timeline.append("g")
+		                  .call(d3.axisLeft(yScale));
+
+
+		              // text label for the y axis
+		              timeline.append("text")
+		                .attr("transform", "rotate(-90)")
+		                .attr("y", 0 - margin.left)
+		                .attr("x",0 - (h2 / 2))
+		                .attr("dy", "1em")
+		                .style("text-anchor", "middle")
+		                .style("font-size", "11px")
+		                .text("Number of Deaths");
+
+		                // text label for the x axis
+		             timeline.append("text")
+		              .attr("transform",
+		              "translate(" + (w2/2) + " ," +
+		                             (h2 + margin.top + 35) + ")")
+		              .style("text-anchor", "middle")
+		              .style("font-size", "11px")
+		              .text("Date");
+
+
+
+		      }
+
+
+
+</script>
+</body>
