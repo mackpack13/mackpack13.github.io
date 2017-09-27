@@ -54,6 +54,14 @@
       float: left;
     }
 
+    .boy:hover {
+      fill: #4782B0;
+    }
+
+    .girl:hover {
+      fill: #D47381;
+    }
+
     @media only screen and (max-width: 768px) {
       #floatRight,
       #floatLeft {
@@ -110,7 +118,7 @@
         // create a scale
         var mapScale = d3.scaleLinear().domain([0, 50]).range([0, 1650])
 
-        var i = 0; //index for streetsFile
+        var i = 0; //index for streetsFileal
         //loop through the file
         while (i < s.length) {
 
@@ -490,9 +498,7 @@
           d3.selectAll(".bar").style("fill", "#4b4b4b")
           d3.select(this)
             .style("fill", "red");
-
-          console.log("meow")
-            // $(this).addClass ("active");
+          // $(this).addClass ("active");
 
           var selectedDate = parseDate(d[0]);
           map.selectAll("circle") //this works
@@ -559,14 +565,25 @@
       // moves the 'group' element to the top left margin
 
       var data = [
-        ["0-10", 10, 50],
-        ["11-20", 50, 70],
-        ["21-40", 20, 90],
-        ["41-60", 100, 40],
-        ["61-80", 55, 5],
-        ["80+", 10, 10]
-      ]
-
+          ["0-10", 65, 77],
+          ["11-20", 29, 19],
+          ["21-40", 34, 24],
+          ["41-60", 22, 35],
+          ["61-80", 46, 45],
+          ["80+", 88, 86]
+        ]
+        // var m = 0;
+        // while (m < deathLocationFile.length){
+        //   //0-10
+        //   if (deathLocationFile[m][2] == 1 ) {
+        //     gender = "O - 10";
+        //     //male 0 -10
+        //     if (deathLocationFile[m][3] == 1){
+        //       console.log("female 41 to 60")
+        //     }
+        //   }
+        //     m++;
+        // }
 
 
       // set the ranges
@@ -579,7 +596,6 @@
 
       var distribution = d3.select("#distribution").append("svg")
         .attr("id", "floatLeft")
-        .style("border", "1px solid red")
         .attr("width", w3 + margin.left + margin.right)
         .attr("height", h3 + margin.top + margin.bottom)
         .append("g")
@@ -608,24 +624,99 @@
         .attr("height", function(d) {
           return h3 - yScale2(d[1]);
         })
-        .attr("fill", "blue")
+        .attr("fill", "#6AAFE6")
+        .on("click", function(d) {
+          d3.selectAll(".boy").style("fill", "#6AAFE6")
+          d3.select(this)
+            .style("fill", "#4782B0");
+          var ageID;
+          var ageGroup = (d[0])
+          switch (ageGroup) {
+            case "0-10":
+              ageID = 0;
+              break;
+            case "11-20":
+              ageID = 1;
+              break;
+            case "21-40":
+              ageID = 2;
+              break;
+            case "41-60":
+              ageID = 3;
+              break;
+            case "61-80":
+              ageID = 4;
+              break;
+            case "80+":
+              ageID = 5;
+              break;
+            default:
+              ageID = "";
+          }
+          map.selectAll("circle") //this works
+            .attr("visibility", function(d) {
+              if (ageID == d[2] && d[3] == 0) {
+                console.log("meow")
+                return "visible";
+              } else {
+                return "hidden";
+              }
+            });
+        })
 
-        distribution.selectAll(".girl")
-          .data(data)
-          .enter().append("rect")
-          .attr("class", "girl")
-          .attr("x", function(d) {
-            return xScale2(d[0]);
-          })
-          .attr("width", 80)
-          .attr("y", function(d) {
-            console.log(d[2])
-            return yScale2(d[2]);
-          })
-          .attr("height", function(d) {
-            return h3 - yScale2(d[2]);
-          })
-          .attr("fill", "red")
+      distribution.selectAll(".girl")
+        .data(data)
+        .enter().append("rect")
+        .attr("class", "girl")
+        .attr("x", function(d) {
+          return xScale2(d[0]);
+        })
+        .attr("width", 80)
+        .attr("y", function(d) {
+          return yScale2(d[2] + d[1]);
+        })
+        .attr("height", function(d) {
+          return h3 - yScale2(d[2]);
+        })
+        .attr("fill", "#FF9DAB")
+        .on("click", function(d) {
+          d3.selectAll(".girl").style("fill", "#FF9DAB")
+          d3.select(this)
+            .style("fill", "#D47381");
+          var ageID;
+          var ageGroup = (d[0])
+          switch (ageGroup) {
+            case "0-10":
+              ageID = 0;
+              break;
+            case "11-20":
+              ageID = 1;
+              break;
+            case "21-40":
+              ageID = 2;
+              break;
+            case "41-60":
+              ageID = 3;
+              break;
+            case "61-80":
+              ageID = 4;
+              break;
+            case "80+":
+              ageID = 5;
+              break;
+            default:
+              ageID = "";
+          }
+          map.selectAll("circle") //this works
+            .attr("visibility", function(d) {
+              if (ageID == d[2] && d[3] == 1) {
+                console.log("meow")
+                return "visible";
+              } else {
+                return "hidden";
+              }
+            });
+        })
 
 
       // add the x Axis
@@ -672,7 +763,6 @@
         .style("font-size", "18px")
         .style("font-weight", "bold")
         .text("Distribution of Age to Gender ");
-
 
     }
   </script>
