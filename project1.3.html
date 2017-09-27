@@ -4,73 +4,6 @@
 <head>
   <meta charset="utf-8">
   <title>The London Cholera Epidemic of 1854 </title>
-  <style>
-  body,
-    html {
-      margin: 0;
-      color: #4b4b4b;
-    }
-
-    #heading {
-      background-color: #4b4b4b;
-      padding: 10px;
-      color: white;
-    }
-
-    .container-fluid {
-      margin: 0 auto !important;
-      padding-right: 0px !important;
-      padding-left: 0px !important;
-      font-family: 'Roboto', sans-serif;
-    }
-
-    .col-lg-12 {
-      display: flex;
-      /* align horizontal */
-    }
-
-    .active {
-      background-color: red;
-    }
-
-    .bar:hover {
-      fill: red;
-    }
-
-    #map {
-      padding-right: 20px;
-    }
-
-    #floatRight {
-      float: right;
-    }
-
-    #timeline,
-    #distribution {
-      padding-left: 20px;
-    }
-
-    #floatLeft {
-      float: left;
-    }
-
-    .boy:hover {
-      fill: #4782B0;
-    }
-
-    .girl:hover {
-      fill: #D47381;
-    }
-
-    @media only screen and (max-width: 768px) {
-      #floatRight,
-      #floatLeft {
-        float: none;
-      }
-    }
-  }
-  </style>
-
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
   <script type="text/javascript" src="d3/d3.js"></script>
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -78,8 +11,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
 
-  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
 
   <script>
     $(document).ready(function() {
@@ -230,7 +165,7 @@
       var streetSVG = map
         .append("path")
         .attr("d", geoPath(streetResult))
-        .style("stroke", "#4b4b4b")
+        .style("stroke", "#566270")
         .style("stroke-width", "1.5px")
         .attr("vector-effect", "non-scaling-stroke")
         .attr("fill", "none")
@@ -259,9 +194,9 @@
 
           return "rotate(" + d[4] + ", " + d[0] + ", " + (h - d[1]) + ")"
         })
-        .style("stroke", "#4b4b4b")
-        .style("stroke-width", "2px")
-        .style("fill", "#CECECE")
+        .style("stroke", "#566270")
+        .style("stroke-width", "1.5px")
+        .style("fill", "#D6DCE3")
 
 
       var names = map
@@ -282,7 +217,8 @@
         .style("font-size", function(d) {
           return d[4] + "px";
         })
-        .style("font-weight", "bold")
+        .style("font-weight", "300")
+        .style("color", "#566270")
         .text(function(d) {
           return d[2];
 
@@ -307,12 +243,12 @@
 
           //if the last element in the array is a 0, it's a male
           if (d[3] == 0) {
-            return "#6AAFE6";
+            return "#30A9DE";
           }
 
           //if the last element in the array is a 1, it's a female
           else if (d[3] == 1) {
-            return "#FF9DAB";
+            return "#F09AB5";
           }
 
         })
@@ -333,7 +269,7 @@
         .attr("width", 10)
         .attr("height", 10)
         .attr("transform", "translate(-80, 90)")
-        .attr("fill", "#881600");
+        .attr("fill", "#9D0F38");
 
 
 
@@ -343,7 +279,6 @@
         .attr("y", 30)
         .attr("text-anchor", "middle")
         .style("font-size", "18px")
-        .style("font-weight", "bold")
         .text("Map of Deaths by Cholera");
 
       //legend of the map
@@ -359,14 +294,13 @@
         .attr("y", (h2 / 2) - 12)
         .attr("width", 15)
         .attr("height", 15)
-        .style("fill", "#881600");
+        .style("fill", "#9D0F38");
 
       legend.append("text")
         .attr("x", 90)
         .attr("y", (h2 / 2))
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
-        .style("font-weight", "bold")
         .text("Pumps");
 
       //male deaths legend info
@@ -374,14 +308,13 @@
         .attr("cx", 165)
         .attr("cy", (h2 / 2) - 5)
         .attr("r", 8)
-        .style("fill", "#6AAFE6");
+        .style("fill", "#30A9DE");
 
       legend.append("text")
         .attr("x", 220)
         .attr("y", (h2 / 2))
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
-        .style("font-weight", "bold")
         .text("Male Deaths");
 
       //female deaths legend info
@@ -389,14 +322,13 @@
         .attr("cx", 310)
         .attr("cy", (h2 / 2) - 5)
         .attr("r", 8)
-        .style("fill", "#FF9DAB");
+        .style("fill", "#F09AB5");
 
       legend.append("text")
         .attr("x", 375)
         .attr("y", (h2 / 2))
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
-        .style("font-weight", "bold")
         .text("Female Deaths");
 
 
@@ -406,20 +338,24 @@
         .attr("y", (h2 / 2) - 18)
         .attr("width", 30)
         .attr("height", 30)
-        .style("stroke", "#4b4b4b")
-        .style("stroke-width", "2px")
-        .style("fill", "#CECECE");
+        .style("stroke", "#566270")
+        .style("stroke-width", "1.5px")
+        .style("fill", "#D6DCE3");
 
       legend.append("text")
         .attr("x", 540)
         .attr("y", (h2 / 2))
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
-        .style("font-weight", "bold")
         .text("Buildings");
 
 
-
+        //legend of the map
+        var filter = d3.select("#map")
+          .append("svg")
+          .attr("height", h2 -10)
+          .attr("width", w2)
+          .attr("id", "floatRight")
 
       // -----------CREATION OF THE LINEGRAPH-----------
 
@@ -477,7 +413,7 @@
         .data(deathDaysFile)
         .enter().append("rect")
         .attr("class", "bar")
-        .attr("fill", "#4b4b4b")
+        .attr("fill", "#083254")
         .attr("x", function(d) {
           return xScale(d[0]);
         })
@@ -495,26 +431,38 @@
         //   d3.select(this).style("fill", "#4b4b4b");
         // })
         .on("click", function(d) {
-          d3.selectAll(".bar").style("fill", "#4b4b4b")
+          d3.selectAll(".bar").style("fill", "#083254")
           d3.select(this)
-            .style("fill", "red");
+            .style("fill", "#00A4A9");
           // $(this).addClass ("active");
 
           var selectedDate = parseDate(d[0]);
           map.selectAll("circle") //this works
             .attr("visibility", function(d) {
               if (d[4] <= selectedDate) {
-                return "visible";
+                  return "visible";
               } else {
                 return "hidden";
               }
+
             });
+
+            //add filter details
+            filter.selectAll("text").remove()
+            filter.append("text")
+              .attr("x", (w2 / 2))
+              .attr("y", (h2 / 2))
+              .attr("text-anchor", "middle")
+              .style("font-size", "16px")
+              .style("font-weight", "400")
+              .text("Filtered by deaths occurring up until " + d[0])
 
 
         });
 
       // add the x Axis
       timeline.append("g")
+        .attr("class", "axisBlueGray")
         .attr("transform", "translate(0," + h3 + ")")
         .call(d3.axisBottom(xScale))
         .selectAll("text")
@@ -528,6 +476,7 @@
 
       // add the y Axis
       timeline.append("g")
+        .attr("class", "axisBlueGray")
         .call(d3.axisLeft(yScale));
 
 
@@ -538,7 +487,7 @@
         .attr("x", 0 - (h3 / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .style("font-size", "11px")
+        .style("font-size", "12px")
         .text("Number of Deaths");
 
       // text label for the x axis
@@ -547,7 +496,7 @@
           "translate(" + (w3 / 2) + " ," +
           (h3 + margin.top + 15) + ")")
         .style("text-anchor", "middle")
-        .style("font-size", "11px")
+        .style("font-size", "12px")
         .text("Date");
 
       timeline.append("text")
@@ -555,7 +504,6 @@
         .attr("y", -20)
         .attr("text-anchor", "middle")
         .style("font-size", "18px")
-        .style("font-weight", "bold")
         .text("Deaths by Day");
 
       //----------CREATE DISTRIBUTION-----------
@@ -624,11 +572,12 @@
         .attr("height", function(d) {
           return h3 - yScale2(d[1]);
         })
-        .attr("fill", "#6AAFE6")
+        .attr("fill", "#30A9DE")
         .on("click", function(d) {
-          d3.selectAll(".boy").style("fill", "#6AAFE6")
+          d3.selectAll(".girl").style("fill", "#F09AB5")
+          d3.selectAll(".boy").style("fill", "#30A9DE")
           d3.select(this)
-            .style("fill", "#4782B0");
+            .style("fill", "#2393C4");
           var ageID;
           var ageGroup = (d[0])
           switch (ageGroup) {
@@ -656,12 +605,19 @@
           map.selectAll("circle") //this works
             .attr("visibility", function(d) {
               if (ageID == d[2] && d[3] == 0) {
-                console.log("meow")
                 return "visible";
               } else {
                 return "hidden";
               }
             });
+            filter.selectAll("text").remove()
+            filter.append("text")
+              .attr("x", (w2/2))
+              .attr("y", (h2 / 2))
+              .attr("text-anchor", "middle")
+              .style("font-size", "16px")
+              .style("font-weight", "400")
+              .text("Filtered by males age " + ageGroup);
         })
 
       distribution.selectAll(".girl")
@@ -678,11 +634,12 @@
         .attr("height", function(d) {
           return h3 - yScale2(d[2]);
         })
-        .attr("fill", "#FF9DAB")
+        .attr("fill", "#F09AB5")
         .on("click", function(d) {
-          d3.selectAll(".girl").style("fill", "#FF9DAB")
+          d3.selectAll(".girl").style("fill", "#F09AB5")
+          d3.selectAll(".boy").style("fill", "#30A9DE")
           d3.select(this)
-            .style("fill", "#D47381");
+            .style("fill", "#D6849D");
           var ageID;
           var ageGroup = (d[0])
           switch (ageGroup) {
@@ -710,17 +667,25 @@
           map.selectAll("circle") //this works
             .attr("visibility", function(d) {
               if (ageID == d[2] && d[3] == 1) {
-                console.log("meow")
                 return "visible";
               } else {
                 return "hidden";
               }
             });
+            filter.selectAll("text").remove()
+            filter.append("text")
+              .attr("x", (w2/2))
+              .attr("y", (h2 / 2))
+              .attr("text-anchor", "middle")
+              .style("font-size", "16px")
+              .style("font-weight", "400")
+              .text("Filtered by females age " + ageGroup);
         })
 
 
       // add the x Axis
       distribution.append("g")
+      .attr("class", "axisBlueGray")
         .attr("transform", "translate(0," + h3 + ")")
         .call(d3.axisBottom(xScale2))
         .selectAll("text")
@@ -734,6 +699,7 @@
 
       // add the y Axis
       distribution.append("g")
+        .attr("class", "axisBlueGray")
         .call(d3.axisLeft(yScale2));
 
 
@@ -744,7 +710,7 @@
         .attr("x", 0 - (h3 / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .style("font-size", "11px")
+        .style("font-size", "12px")
         .text("Number of Deaths");
 
       // text label for the x axis
@@ -753,7 +719,7 @@
           "translate(" + (w3 / 2) + " ," +
           (h3 + margin.top + 15) + ")")
         .style("text-anchor", "middle")
-        .style("font-size", "11px")
+        .style("font-size", "12px")
         .text("Age Ranges");
 
       distribution.append("text")
@@ -761,7 +727,6 @@
         .attr("y", -20)
         .attr("text-anchor", "middle")
         .style("font-size", "18px")
-        .style("font-weight", "bold")
         .text("Distribution of Age to Gender ");
 
     }
@@ -772,11 +737,11 @@
 
 <body>
   <!-- Modal -->
-  <!-- <div class="modal fade" id="memberModal" tabindex="-1" role="dialog" aria-labelledby="memberModalLabel" aria-hidden="true">
+  <div class="modal fade" id="memberModal" tabindex="-1" role="dialog" aria-labelledby="memberModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="memberModalLabel" style="float: left">Welcome!</h4>
+          <h4 class="modal-title" id="memberModalLabel">Welcome!</h4>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
           </button>
 
@@ -785,18 +750,20 @@
         <div class="modal-body">
           <p>This is an interactive map of the London Cholera Epidemic of 1854. It details the locations of each death, the locations of important areas (i.e. pumps, brewery), and the number of deaths over the course of the 40 days.
             <p>To filter the data shown on the map, select the bars within the bargraphs.</p>
-            <p>Check out the <a href="https://docs.google.com/document/d/1-BEUOOoCBh8uPXjka5E_6QGTFy3g3YnBlJkM5N-eCac/edit?usp=sharing" style="text-decoration: none" target="_blank">design documentation</a> and <a href="#" style="text-decoration: none" target="_blank">informational video</a> to learn more about how this project was made.sharing</p>
+            <p>Check out the <a href="https://docs.google.com/document/d/1-BEUOOoCBh8uPXjka5E_6QGTFy3g3YnBlJkM5N-eCac/edit?usp=sharing" style="text-decoration: none; color: #00A4A9; font-size: bold " target="_blank">design documentation</a> and <a href="#"
+              style="text-decoration: none;  color: #00A4A9; font-size: bold" target="_blank">informational video</a> to learn more about how this project was made.sharing</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">Let's go</button>
+          <button type="button" class="btn" style="background-color: #00A4A9 !important; color: white" data-dismiss="modal">Let's go</button>
         </div>
       </div>
     </div>
-  </div> -->
+  </div>
   <div class="container-fluid text-center">
     <div id="heading">
-      <h2>The London Cholera Epidemic of 1854 </h2> Mikaylah Gross | INFO-H517
+      <h2 style="color: #566270 !important">The London Cholera Epidemic of 1854 </h2> <span>Mikaylah Gross | INFO-H517</span>
     </div>
+    <br>
     <div class="row ">
       <div class="col-md-12 col-lg-6" id="map">
 

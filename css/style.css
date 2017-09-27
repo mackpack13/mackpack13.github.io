@@ -1,0 +1,94 @@
+body,
+  html {
+    margin: 0;
+  }
+
+  .container-fluid {
+    margin: 0 auto !important;
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    color: #566270;
+  }
+
+  #heading {
+    padding: 10px;
+    border-bottom: 1px solid #DEE2E6
+  }
+
+ h2{
+    color: #566270 !important;
+    font-weight: 300;
+  }
+
+  .col-lg-12 {
+    display: flex;
+    /* align horizontal */
+  }
+
+  .active {
+    background-color: red;
+  }
+
+  .bar:hover {
+    fill: #00A4A9;
+  }
+
+  #map {
+    padding-right: 20px;
+  }
+
+  #floatRight {
+    float: right;
+  }
+
+  #timeline,
+  #distribution {
+    padding-left: 20px;
+  }
+
+  #floatLeft {
+    float: left;
+  }
+
+  .boy:hover {
+    fill: #2393C4;
+  }
+
+  .girl:hover {
+    fill: #D6849D;
+  }
+
+  .modal h4 , .modal p{
+    float: left;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    color: #566270
+  }
+  .modal button {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+  }
+
+  .axisBlueGray line{
+  stroke: #566270;
+}
+
+.axisBlueGray path{
+  stroke: #566270;
+}
+
+.axisBlueGray text{
+  fill: #566270;
+}
+.reset {
+
+  color: #00A4A9
+}
+  @media only screen and (max-width: 768px) {
+    #floatRight,
+    #floatLeft {
+      float: none;
+    }
+  }
